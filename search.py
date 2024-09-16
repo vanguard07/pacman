@@ -141,7 +141,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     pq = util.PriorityQueue()
     visited = set()
     startState = problem.getStartState()
-    pq.push((startState, [], heuristic(startState, problem)), 0)
+    pq.push((startState, [], 0), heuristic(startState, problem))
 
     while(not pq.isEmpty()):
         state, moves, cost = pq.pop()

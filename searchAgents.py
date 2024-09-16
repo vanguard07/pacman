@@ -380,10 +380,18 @@ def cornersHeuristic(state, problem):
     admissible (as well as consistent).
     """
     corners = problem.corners # These are the corner coordinates
-    walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
+    walls = problem.walls # These are the walls of the maze, as a Gripyd (game.py)
 
-    "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    coord, visitedCorners = state
+    if(len(visitedCorners) == 4):
+        return 0
+
+    minHeuristic = float('inf')
+    for index in range(4):
+        if(chr(ord("A")+index) not in visitedCorners):
+            currentHeuristic = abs(coord[0] - corners[index][0]) + abs(coord[1] - corners[index][1])
+            minHeuristic = min(minHeuristic, currentHeuristic)
+    return minHeuristic
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
