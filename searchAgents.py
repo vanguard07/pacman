@@ -473,7 +473,7 @@ def foodHeuristic(state, problem):
     a list of food coordinates instead.
 
     If you want access to info like walls, capsules, etc., you can query the
-    problem.  For example, problem.walls gives you a Grid of where the walls
+    problem. For example, problem.walls gives you a Grid of where the walls
     are.
 
     If you want to *store* information to be reused in other calls to the
@@ -484,8 +484,15 @@ def foodHeuristic(state, problem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
-    "*** YOUR CODE HERE ***"
-    return 0
+
+    if(len(foodGrid.asList()) == 0):
+        return 0
+
+    maxHeuristic = 0
+    for foodItem in foodGrid.asList():
+        currentHeuristic = abs(position[0] - foodItem[0]) + abs(position[1] - foodItem[1])
+        maxHeuristic = max(maxHeuristic, currentHeuristic)
+    return maxHeuristic
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
