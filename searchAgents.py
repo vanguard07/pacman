@@ -274,9 +274,8 @@ class CornersProblem(search.SearchProblem):
     """
 
     def __init__(self, startingGameState):
-        """
-        Stores the walls, pacman's starting position and corners.
-        """
+        """Stores the walls, pacman's starting position and corners."""
+
         self.walls = startingGameState.getWalls()
         self.startingPosition = startingGameState.getPacmanPosition()
         top, right = self.walls.height-2, self.walls.width-2
@@ -288,7 +287,7 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
 
-        self.visitedCorners = set()
+        self.visitedCorners = 0
         self.costFn = lambda x: 1
         self.visualize = True
         self._visited, self._visitedlist, self._expanded = {}, [], 0 # DO NOT CHANGE
@@ -296,16 +295,15 @@ class CornersProblem(search.SearchProblem):
     def getStartState(self):
         """Returns the start state (in your state space, not the full Pacman state space)"""
 
-        return self.startingPosition
+        return (self.startingPosition, "")
 
     def isGoalState(self, state):
         """Returns whether this search state is a goal state of the problem."""
-
-        isGoal = len(self.visitedCorners) == 4
+        isGoal = len(state[1]) == 4
 
         # For display purposes only
         if isGoal and self.visualize:
-            self._visitedlist.append(state)
+            self._visitedlist.append(state[0])
             import __main__
             if '_display' in dir(__main__):
                 if 'drawExpandedCells' in dir(__main__._display): #@UndefinedVariable
@@ -324,23 +322,32 @@ class CornersProblem(search.SearchProblem):
             is the incremental cost of expanding to that successor
         """
 
-        if state in self.corners:
-            self.visitedCorners.add(state)
-
         successors = []
+        coord, visitedCorners = state
+        if(len(visitedCorners) < self.visitedCorners - 1):
+            return []
+        x, y = coord
+
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
-            x, y = state
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
+            updatedVisitedCorners = visitedCorners
+
             if not self.walls[nextx][nexty]:
                 nextState = (nextx, nexty)
+                if nextState in self.corners:
+                    nextStateIndex = self.corners.index(nextState)
+                    nextStateChar = chr(ord("A")+nextStateIndex)
+                    if nextStateChar not in visitedCorners:
+                        updatedVisitedCorners = visitedCorners + nextStateChar
+                        self.visitedCorners = max(self.visitedCorners, len(updatedVisitedCorners))
                 cost = self.costFn(nextState)
-                successors.append( ( nextState, action, cost) )
+                successors.append(((nextState, updatedVisitedCorners), action, cost))
 
         self._expanded += 1 # DO NOT CHANGE
         if state not in self._visited:
-            self._visited[state] = True
-            self._visitedlist.append(state)
+            self._visited[state[0]] = True
+            self._visitedlist.append(state[0])
 
         return successors
 
@@ -349,8 +356,9 @@ class CornersProblem(search.SearchProblem):
         Returns the cost of a particular sequence of actions.  If those actions
         include an illegal move, return 999999.  This is implemented for you.
         """
+
         if actions == None: return 999999
-        x,y= self.startingPosition
+        x, y = self.startingPosition
         for action in actions:
             dx, dy = Actions.directionToVector(action)
             x, y = int(x + dx), int(y + dy)
