@@ -483,16 +483,50 @@ def foodHeuristic(state, problem):
     Subsequent calls to this heuristic can access
     problem.heuristicInfo['wallCount']
     """
-    position, foodGrid = state
+    def manhattanDistance(position1, position2):
+        return abs(position1[0] - position2[0]) + abs(position1[1] - position2[1])
 
-    if(len(foodGrid.asList()) == 0):
+    def minimumSpanningTreeCost(root, foodList):
+        edges = util.PriorityQueue()
+        visited = set()
+        visited.add(root)
+        totalCost = 0
+        
+        for food in foodList:
+            if(food == root):
+                continue
+            edgeCost = manhattanDistance(root, food)
+            edges.push((root, food, edgeCost), edgeCost)
+ 
+        while len(visited) < len(foodList):
+            _, nextFood, edgeCost = edges.pop()
+            
+            if nextFood not in visited:
+                visited.add(nextFood)
+                totalCost += edgeCost
+                
+                for food in foodList:
+                    if food not in visited:
+                        nextEdgeCost = manhattanDistance(nextFood, food)
+                        edges.push((nextFood, food, nextEdgeCost), nextEdgeCost)
+        
+        return totalCost
+
+    position, foodGrid = state
+    foodList = foodGrid.asList()
+
+    if(len(foodList) == 0):
         return 0
 
-    maxHeuristic = 0
-    for foodItem in foodGrid.asList():
-        currentHeuristic = abs(position[0] - foodItem[0]) + abs(position[1] - foodItem[1])
-        maxHeuristic = max(maxHeuristic, currentHeuristic)
-    return maxHeuristic
+    nearestFood = position
+    minHeuristic = float('inf')
+    for foodItem in foodList:
+        currentHeuristic = manhattanDistance(position, foodItem)
+        if(currentHeuristic < minHeuristic):
+            nearestFood = foodItem
+            minHeuristic = currentHeuristic
+
+    return manhattanDistance(position, nearestFood) + minimumSpanningTreeCost(nearestFood, foodList)
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
