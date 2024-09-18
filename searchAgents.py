@@ -473,7 +473,7 @@ def foodHeuristic(state, problem):
     a list of food coordinates instead.
 
     If you want access to info like walls, capsules, etc., you can query the
-    problem.  For example, problem.walls gives you a Grid of where the walls
+    problem. For example, problem.walls gives you a Grid of where the walls
     are.
 
     If you want to *store* information to be reused in other calls to the
@@ -483,9 +483,50 @@ def foodHeuristic(state, problem):
     Subsequent calls to this heuristic can access
     problem.heuristicInfo['wallCount']
     """
+    def manhattanDistance(position1, position2):
+        return abs(position1[0] - position2[0]) + abs(position1[1] - position2[1])
+
+    def minimumSpanningTreeCost(root, foodList):
+        edges = util.PriorityQueue()
+        visited = set()
+        visited.add(root)
+        totalCost = 0
+        
+        for food in foodList:
+            if(food == root):
+                continue
+            edgeCost = manhattanDistance(root, food)
+            edges.push((root, food, edgeCost), edgeCost)
+ 
+        while len(visited) < len(foodList):
+            _, nextFood, edgeCost = edges.pop()
+            
+            if nextFood not in visited:
+                visited.add(nextFood)
+                totalCost += edgeCost
+                
+                for food in foodList:
+                    if food not in visited:
+                        nextEdgeCost = manhattanDistance(nextFood, food)
+                        edges.push((nextFood, food, nextEdgeCost), nextEdgeCost)
+        
+        return totalCost
+
     position, foodGrid = state
-    "*** YOUR CODE HERE ***"
-    return 0
+    foodList = foodGrid.asList()
+
+    if(len(foodList) == 0):
+        return 0
+
+    nearestFood = position
+    minHeuristic = float('inf')
+    for foodItem in foodList:
+        currentHeuristic = manhattanDistance(position, foodItem)
+        if(currentHeuristic < minHeuristic):
+            nearestFood = foodItem
+            minHeuristic = currentHeuristic
+
+    return manhattanDistance(position, nearestFood) + minimumSpanningTreeCost(nearestFood, foodList)
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
