@@ -483,8 +483,6 @@ def foodHeuristic(state, problem):
     Subsequent calls to this heuristic can access
     problem.heuristicInfo['wallCount']
     """
-    def manhattanDistance(position1, position2):
-        return abs(position1[0] - position2[0]) + abs(position1[1] - position2[1])
 
     def minimumSpanningTreeCost(root, foodList):
         edges = util.PriorityQueue()
@@ -495,11 +493,11 @@ def foodHeuristic(state, problem):
         for food in foodList:
             if(food == root):
                 continue
-            edgeCost = manhattanDistance(root, food)
+            edgeCost = mazeDistance(root, food, problem.startingGameState)
             edges.push((root, food, edgeCost), edgeCost)
  
         while len(visited) < len(foodList):
-            _, nextFood, edgeCost = edges.pop()
+            currentNode, nextFood, edgeCost = edges.pop()
             
             if nextFood not in visited:
                 visited.add(nextFood)
@@ -507,7 +505,7 @@ def foodHeuristic(state, problem):
                 
                 for food in foodList:
                     if food not in visited:
-                        nextEdgeCost = manhattanDistance(nextFood, food)
+                        nextEdgeCost = mazeDistance(nextFood, food, problem.startingGameState)
                         edges.push((nextFood, food, nextEdgeCost), nextEdgeCost)
         
         return totalCost
@@ -521,12 +519,12 @@ def foodHeuristic(state, problem):
     nearestFood = position
     minHeuristic = float('inf')
     for foodItem in foodList:
-        currentHeuristic = manhattanDistance(position, foodItem)
+        currentHeuristic = mazeDistance(position, foodItem, problem.startingGameState)
         if(currentHeuristic < minHeuristic):
             nearestFood = foodItem
             minHeuristic = currentHeuristic
 
-    return manhattanDistance(position, nearestFood) + minimumSpanningTreeCost(nearestFood, foodList)
+    return mazeDistance(position, nearestFood, problem.startingGameState) + minimumSpanningTreeCost(nearestFood, foodList)
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
