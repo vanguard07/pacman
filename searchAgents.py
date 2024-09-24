@@ -295,6 +295,7 @@ class CornersProblem(search.SearchProblem):
     def getStartState(self):
         """Returns the start state (in your state space, not the full Pacman state space)"""
 
+        # stores a tuple of position and visitedCorners
         return (self.startingPosition, "")
 
     def isGoalState(self, state):
@@ -332,7 +333,9 @@ class CornersProblem(search.SearchProblem):
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
             updatedVisitedCorners = visitedCorners
+            #indexing of corners: A -> bottom-left, B -> top-left, C -> bottom-right, D -> top-right
 
+            # ((x,y),"A") and ((x,y),"AB") are 2 different unique nodes
             if not self.walls[nextx][nexty]:
                 nextState = (nextx, nexty)
                 if nextState in self.corners:
@@ -484,6 +487,7 @@ def foodHeuristic(state, problem):
     problem.heuristicInfo['wallCount']
     """
 
+    # Using Prim's algorithm to find minimum cost of exploring all food nodes
     def minimumSpanningTreeCost(root, foodList):
         edges = util.PriorityQueue()
         visited = set()
@@ -513,6 +517,7 @@ def foodHeuristic(state, problem):
     position, foodGrid = state
     foodList = foodGrid.asList()
 
+    # goal state check
     if(len(foodList) == 0):
         return 0
 
@@ -554,6 +559,7 @@ class ClosestDotSearchAgent(SearchAgent):
         walls = gameState.getWalls()
         problem = AnyFoodSearchProblem(gameState)
 
+        # Using BFS to find the next closest food
         return search.bfs(problem)
 
 class AnyFoodSearchProblem(PositionSearchProblem):
